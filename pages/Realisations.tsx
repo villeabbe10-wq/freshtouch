@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { SectionTitle, FadeIn } from '../components/ui/Common';
-import { REALIZATIONS } from '../constants';
 import { MapPin, Sparkles, Box, Quote } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 const RealisationsPage: React.FC = () => {
+  const { realizations } = useData();
+
   return (
     <div className="pt-32 pb-24 min-h-screen bg-primary-cream">
       <div className="container mx-auto px-6">
@@ -14,7 +16,7 @@ const RealisationsPage: React.FC = () => {
         />
         
         <div className="space-y-20 mt-16">
-          {REALIZATIONS.map((project, idx) => {
+          {realizations.map((project, idx) => {
             const isEven = idx % 2 === 0;
             return (
               <FadeIn key={project.id} delay={idx * 0.1}>
@@ -79,7 +81,7 @@ const RealisationsPage: React.FC = () => {
                 </div>
                 
                 {/* Divider unless last item */}
-                {idx !== REALIZATIONS.length - 1 && (
+                {idx !== realizations.length - 1 && (
                   <div className="w-full h-px bg-primary-gold/20 my-20 mx-auto max-w-4xl" />
                 )}
               </FadeIn>

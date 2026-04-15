@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "GalleryItem": {
+      "title": "Gallery Item",
+      "description": "An item in the portfolio gallery",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "title", "category", "imageUrl"]
+    },
+    "PricingItem": {
+      "title": "Pricing Item",
+      "description": "An item in the pricing list",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "name", "price", "category"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/gallery": {
+      "schema": "GalleryItem",
+      "description": "Collection of gallery items"
+    },
+    "/pricing": {
+      "schema": "PricingItem",
+      "description": "Collection of pricing items"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    }
+  }
+}

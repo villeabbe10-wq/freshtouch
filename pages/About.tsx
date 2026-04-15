@@ -2,8 +2,12 @@
 import React from 'react';
 import { SectionTitle, FadeIn } from '../components/ui/Common';
 import { Star, Check, Heart } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 const AboutPage: React.FC = () => {
+  const { settings } = useData();
+  const defaultPhoto = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800";
+
   return (
     <div className="pt-32 pb-24 min-h-screen bg-primary-cream">
       <div className="container mx-auto px-6">
@@ -22,7 +26,7 @@ const AboutPage: React.FC = () => {
            <FadeIn className="relative">
              <div className="relative z-10">
                <img 
-                 src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800" 
+                 src={settings.aboutPhotoUrl || defaultPhoto} 
                  alt="Marceline AYITE" 
                  className="w-full aspect-[3/4] object-cover shadow-2xl rounded-sm grayscale hover:grayscale-0 transition-all duration-700"
                />
@@ -41,15 +45,15 @@ const AboutPage: React.FC = () => {
                   Je m'appelle <strong>Marceline AYITE</strong>, fondatrice de Fresh Touch Event, une entreprise née d'un amour profond pour l'art de recevoir et la beauté des détails. Depuis toujours, j'ai été fascinée par les ambiances chaleureuses, les tables soigneusement dressées, et les sourires que provoque une décoration bien pensée.
                 </p>
                 <p>
-                  Fresh Touch Event est bien plus qu'un service de location de couverts — c'est une invitation à célébrer avec style, à transformer chaque repas en moment mémorable, et à faire de chaque événement une œuvre d'art.
+                  Fresh Touch Event est bien plus qu'un service de location de vaisselle — c'est une invitation à célébrer avec style, à transformer chaque repas en moment mémorable, et à faire de chaque événement une œuvre d'art.
                 </p>
                 
                 <h3 className="font-serif text-2xl text-primary-dark pt-4">Mon histoire</h3>
                 <p>
-                  Tout a commencé à <strong>Lomé</strong>, lors d'un dîner que j'avais organisé pour ma famille. J'avais mis tout mon cœur dans la décoration de la table: des couverts dorés, des serviettes en lin, quelques fleurs fraîches… et ce soir-là, j'ai vu des étoiles dans les yeux de mes invités. Ce moment m'a révélée.
+                  Tout a commencé à <strong>Lomé</strong>, par une passion pour le beau et le raffinement. J'ai compris que l'élégance pouvait être partagée, et que j'avais le pouvoir d'en faire mon métier. C'est ainsi qu'est né Fresh Touch Event — avec une mission simple: offrir aux autres ce que j'aime créer.
                 </p>
                 <p>
-                  J'ai compris que l'élégance pouvait être partagée, et que j'avais le pouvoir d'en faire mon métier. C'est ainsi qu'est né Fresh Touch Event — avec une mission simple: offrir aux autres ce que j'aime créer.
+                  Aujourd'hui, nous accompagnons nos clients dans la création d'ambiances uniques, que ce soit pour un mariage prestigieux, un dîner intime ou un événement d'entreprise. Notre engagement reste le même : l'excellence dans chaque détail.
                 </p>
              </div>
            </FadeIn>

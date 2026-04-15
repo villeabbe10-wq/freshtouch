@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: gallery
+    // Fields: id, title, category, imageUrl, description
+    //
+    // Collection: pricing
+    // Fields: id, name, price, category
+    //
+    // Collection: users
+    // Fields: uid, email, role
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "seduceconseil@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidGalleryItem(data) {
+      return data.keys().hasAll(['id', 'title', 'category', 'imageUrl']) &&
+             data.id is string &&
+             data.title is string && data.title.size() < 200 &&
+             data.category is string &&
+             data.imageUrl is string && data.imageUrl.size() < 1000;
+    }
+
+    function isValidPricingItem(data) {
+      return data.keys().hasAll(['id', 'name', 'price', 'category']) &&
+             data.id is string &&
+             data.name is string && data.name.size() < 200 &&
+             data.price is string && data.price.size() < 50 &&
+             data.category is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /gallery/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidGalleryItem(request.resource.data);
+    }
+
+    match /pricing/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidPricingItem(request.resource.data);
+    }
+
+    match /realizations/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /messages/{messageId} {
+      allow create: if true;
+      allow read, delete, update: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+  }
+}

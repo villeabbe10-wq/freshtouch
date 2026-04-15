@@ -4,8 +4,10 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, Instagram, Facebook, Mail, Phone, MapPin, ChevronRight } from 'lucide-react';
 import { NAVIGATION_LINKS } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useData } from '../context/DataContext';
 
 // --- Animations Variants ---
+// ... (previous code remains same)
 const menuVariants = {
   closed: {
     opacity: 0,
@@ -45,6 +47,7 @@ export const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { settings } = useData();
 
   // Handle Scroll Effect
   useEffect(() => {
@@ -78,20 +81,28 @@ export const Header: React.FC = () => {
         
         {/* Logo Image Integration */}
         <NavLink to="/" className="group relative z-50 flex items-center gap-2" aria-label="Fresh Touch Event Accueil">
-             <img 
-               src="/logo.png" 
-               alt="Fresh Touch Event" 
-               className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105"
-               onError={(e) => {
-                 // Fallback textuel si l'image n'est pas trouvée
-                 e.currentTarget.style.display = 'none';
-                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
-               }}
-             />
+             {settings.logoUrl ? (
+               <img 
+                 src={settings.logoUrl} 
+                 alt="Fresh Touch Event" 
+                 className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105"
+               />
+             ) : (
+               <img 
+                 src="/logo.png" 
+                 alt="Fresh Touch Event" 
+                 className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                 onError={(e) => {
+                   // Fallback textuel si l'image n'est pas trouvée
+                   e.currentTarget.style.display = 'none';
+                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                 }}
+               />
+             )}
              
              {/* Fallback (Texte) caché par défaut, s'affiche si l'image plante */}
-             <div className="hidden flex-col items-start pl-2 border-l border-primary-gold/50 ml-2">
-               <span className={`font-serif text-xl md:text-2xl font-bold tracking-tight text-primary-green leading-none`}>
+             <div className={`${settings.logoUrl ? 'hidden' : 'hidden'} flex-col items-start pl-2 border-l border-primary-gold/50 ml-2`}>
+               <span className={`font-serif text-xl md:text-2xl font-bold tracking-tight text-primary-dark leading-none`}>
                 Fresh Touch
               </span>
               <span className="font-sans text-[9px] tracking-[0.3em] uppercase text-primary-gold pl-0.5 leading-none mt-1">
@@ -222,6 +233,7 @@ export const Header: React.FC = () => {
 };
 
 export const Footer: React.FC = () => {
+  const { settings } = useData();
   return (
     <footer className="bg-primary-green text-white border-t border-primary-gold/30 relative overflow-hidden">
       
@@ -232,18 +244,26 @@ export const Footer: React.FC = () => {
           {/* Brand & Socials - Col Span 4 */}
           <div className="md:col-span-5 lg:col-span-4 space-y-8">
             <div>
-              <h2 className="font-serif text-2xl font-bold text-white tracking-widest uppercase mb-4">Fresh Touch Event</h2>
+              {settings.logoUrl ? (
+                <img src={settings.logoUrl} alt="Logo" className="h-16 w-auto object-contain mb-6 brightness-0 invert" />
+              ) : (
+                <h2 className="font-serif text-2xl font-bold text-white tracking-widest uppercase mb-4">Fresh Touch Event</h2>
+              )}
               <p className="text-gray-200 text-sm leading-relaxed max-w-sm font-sans opacity-80">
                 Votre partenaire privilégié pour la location de vaisselle et la décoration événementielle à Lomé. Créez des souvenirs inoubliables avec une touche d'élégance unique.
               </p>
             </div>
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary-gold hover:bg-primary-gold hover:text-white transition-all duration-300 border border-transparent hover:border-primary-cream">
-                <Instagram size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary-gold hover:bg-primary-gold hover:text-white transition-all duration-300 border border-transparent hover:border-primary-cream">
-                <Facebook size={18} />
-              </a>
+              {settings.instagramUrl && (
+                <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary-gold hover:bg-primary-gold hover:text-white transition-all duration-300 border border-transparent hover:border-primary-cream">
+                  <Instagram size={18} />
+                </a>
+              )}
+              {settings.facebookUrl && (
+                <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary-gold hover:bg-primary-gold hover:text-white transition-all duration-300 border border-transparent hover:border-primary-cream">
+                  <Facebook size={18} />
+                </a>
+              )}
             </div>
           </div>
 

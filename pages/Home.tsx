@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { SectionTitle, Button, FadeIn } from '../components/ui/Common';
 import { SERVICES, TESTIMONIALS } from '../constants';
 import { Star, Crown, Table, Flower } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 const iconMap = {
   crown: Crown,
@@ -100,14 +101,13 @@ const Presentation: React.FC = () => {
 };
 
 const RealizationsPreview: React.FC = () => {
-  const images = [
-    { src: 'https://images.unsplash.com/photo-1519225421980-715cb0202128?auto=format&fit=crop&q=80&w=600', alt: 'Table élégante' },
-    { src: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?auto=format&fit=crop&q=80&w=600', alt: 'Couverts dorés' },
-    { src: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=600', alt: 'Composition florale' },
-    { src: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600', alt: 'Décoration complète 1' },
-    { src: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&q=80&w=600', alt: 'Décoration complète 2' },
-    { src: 'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?auto=format&fit=crop&q=80&w=600', alt: 'Décoration complète 3' },
-  ];
+  const { realizations } = useData();
+  
+  // Take the first 6 realizations for the preview
+  const previewImages = realizations.slice(0, 6).map(r => ({
+    src: r.imageUrl,
+    alt: r.title
+  }));
 
   return (
     <section className="py-20 md:py-32 bg-white">
@@ -115,7 +115,7 @@ const RealizationsPreview: React.FC = () => {
         <SectionTitle subtitle="Un aperçu de notre univers créatif" title="Quelques Réalisations" />
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-16 mb-16">
-          {images.map((img, idx) => (
+          {previewImages.map((img, idx) => (
             <FadeIn key={idx} delay={idx * 0.1} className="relative group overflow-hidden aspect-square shadow-md cursor-pointer">
               <img 
                 src={img.src} 
@@ -175,7 +175,8 @@ const Expertise: React.FC = () => {
 };
 
 const TestimonialSection: React.FC = () => {
-  const t = TESTIMONIALS[0];
+  const { testimonials } = useData();
+  const t = testimonials[0];
   if (!t) return null;
 
   return (
@@ -194,7 +195,7 @@ const TestimonialSection: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <FadeIn>
              <div className="flex justify-center mb-10 text-primary-gold space-x-2">
-               {[...Array(5)].map((_, i) => <Star key={i} size={28} fill="currentColor" strokeWidth={0} />)}
+               {[...Array(t.rating)].map((_, i) => <Star key={i} size={28} fill="currentColor" strokeWidth={0} />)}
              </div>
              <blockquote className="text-center">
                <p className="font-serif text-xl md:text-3xl italic text-primary-cream leading-normal mb-12 font-light">
@@ -202,6 +203,7 @@ const TestimonialSection: React.FC = () => {
                </p>
                <footer className="text-center">
                  <div className="font-sans font-bold uppercase tracking-[0.2em] text-white text-lg border-b border-primary-gold inline-block pb-2">{t.name}</div>
+                 <div className="text-xs text-primary-gold uppercase tracking-widest mt-2">{t.role}</div>
                </footer>
              </blockquote>
           </FadeIn>
