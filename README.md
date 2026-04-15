@@ -1,11 +1,41 @@
-<div align="center">
+# Fresh Touch Event
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Luxury event planning and decoration portfolio featuring a sophisticated gallery and service showcase.
 
-  <h1>Built with AI Studio</h2>
+## Tech Stack
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- **React 19**
+- **Vite**
+- **Tailwind CSS**
+- **Framer Motion** (Animations)
+- **Lucide React** (Icons)
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Getting Started
 
-</div>
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/villeabbe10-wq/ayite.git
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## Project Structure
+
+- `components/`: Reusable UI components.
+- `pages/`: Application pages (Home, Services, Gallery, etc.).
+- `context/`: React context for data management.
+- `constants.ts`: Global constants and configuration.
+- `types.ts`: TypeScript type definitions.
