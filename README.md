@@ -39,7 +39,28 @@ Luxury event planning and decoration portfolio featuring a sophisticated gallery
      ```
 4. **Start the development server**: `npm run dev`
 
-## Project Structure
+## Deployment to Firebase Hosting
+
+To visualize your work on your `.web.app` URL:
+
+1. **Build the project**:
+   ```bash
+   npm run build
+   ```
+2. **Install Firebase CLI** (if not already done):
+   ```bash
+   npm install -g firebase-tools
+   ```
+3. **Login to Firebase**:
+   ```bash
+   firebase login
+   ```
+4. **Deploy**:
+   ```bash
+   firebase deploy --only hosting
+   ```
+
+Your site will be available at `https://collete-boutique.web.app` (or your custom domain).
 
 - `pages/Admin.tsx`: The heart of the site management.
 - `context/DataContext.tsx`: Handles all real-time data synchronization with Firebase.
