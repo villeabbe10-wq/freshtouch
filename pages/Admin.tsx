@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { SectionTitle, Button, FadeIn } from '../components/ui/Common';
 import { useData } from '../context/DataContext';
-import { Lock, Plus, Trash2, Image as ImageIcon, Package, Upload, LogOut, Loader2, Database, Camera, Star, MessageCircle, Instagram, Facebook, LayoutDashboard, CheckCircle, Clock, Phone } from 'lucide-react';
+import { Lock, Plus, Trash2, Image as ImageIcon, Play, Package, Upload, LogOut, Loader2, Database, Camera, Star, MessageCircle, Instagram, Facebook, LayoutDashboard, CheckCircle, Clock, Phone } from 'lucide-react';
 import { Category, GalleryItem, PricingItem } from '../types';
 import { auth, storage } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -10,11 +10,12 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { INITIAL_PRICING_DATA, GALLERY_ITEMS } from '../constants';
 
 const AdminPage: React.FC = () => {
-  const { user, loading: authLoading, addPricingItem, addGalleryItem, pricingItems, galleryItems, settings, updateSettings, realizations, addRealization, deleteRealization } = useData();
+  const { user, loading: authLoading, admins, addPricingItem, addGalleryItem, pricingItems, galleryItems, settings, updateSettings, realizations, addRealization, deleteRealization } = useData();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   
+  const isAdminUser = user?.email === "seduceconseil@gmail.com" || admins.some(a => a.uid === user?.uid || a.email === user?.email);
   const handleImportData = async () => {
     setIsImporting(true);
     try {
@@ -91,6 +92,32 @@ const AdminPage: React.FC = () => {
     );
   }
 
+  if (!isAdminUser) {
+    return (
+      <div className="min-h-screen bg-primary-cream flex items-center justify-center pt-24 px-6">
+        <div className="bg-white p-8 md:p-12 shadow-xl border border-primary-gold/30 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Lock size={32} />
+          </div>
+          <h2 className="font-serif text-2xl text-primary-dark mb-2">Accès Refusé</h2>
+          <p className="text-sm font-sans text-gray-500 mb-4">
+            Désolé, votre compte <strong>{user.email}</strong> n'est pas autorisé à accéder à cette interface.
+          </p>
+          <p className="text-xs text-gray-400 mb-8 italic">
+            Veuillez contacter l'administrateur principal pour demander l'accès.
+          </p>
+          
+          <button 
+            onClick={handleLogout} 
+            className="w-full bg-primary-dark text-white p-4 font-sans font-bold hover:bg-primary-gold transition-colors"
+          >
+            Se déconnecter
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-24">
       <div className="container mx-auto px-6">
@@ -137,6 +164,7 @@ const AdminPage: React.FC = () => {
           {/* Left Column */}
           <div className="space-y-12">
             <UserManagementSection />
+            <VideoManagementSection />
             <MessageManagementSection />
             <SiteSettingsSection />
             <AddProductSection />
@@ -200,6 +228,9 @@ const UserManagementSection: React.FC = () => {
 
       <div className="space-y-2">
         <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Administrateurs Actifs</div>
+        {admins.length === 0 && user?.email !== "seduceconseil@gmail.com" && (
+          <p className="text-xs text-gray-400 italic">Chargement ou aucun admin supplémentaire...</p>
+        )}
         {admins.map(admin => (
           <div key={admin.uid} className="flex justify-between items-center p-3 bg-gray-50 rounded-sm">
             <span className="text-sm font-medium text-primary-dark">{admin.email}</span>
@@ -213,14 +244,127 @@ const UserManagementSection: React.FC = () => {
             )}
           </div>
         ))}
-        {/* Placeholder for permanent admin */}
-        {!admins.find(a => a.email === "seduceconseil@gmail.com") && (
+        {/* Permanent admin reminder */}
+        {user?.email === "seduceconseil@gmail.com" && !admins.find(a => a.email === user.email) && (
           <div className="flex justify-between items-center p-3 bg-primary-gold/5 border border-primary-gold/20 rounded-sm">
             <span className="text-sm font-medium text-primary-dark">seduceconseil@gmail.com</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-gold">Super Admin</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-gold">Propriétaire</span>
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+const VideoManagementSection: React.FC = () => {
+  const { settings, updateSettings } = useData();
+  const [videoUrl, setVideoUrl] = useState(settings.mainVideoUrl || '');
+  const [videoTitle, setVideoTitle] = useState(settings.mainVideoTitle || "L'Art de Recevoir par Fresh Touch Event");
+  const [videoSubtitle, setVideoSubtitle] = useState(settings.mainVideoSubtitle || "Plongez au cœur de nos plus belles créations");
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setVideoUrl(settings.mainVideoUrl || '');
+    setVideoTitle(settings.mainVideoTitle || "");
+    setVideoSubtitle(settings.mainVideoSubtitle || "");
+  }, [settings]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      await updateSettings({
+        mainVideoUrl: videoUrl,
+        mainVideoTitle: videoTitle,
+        mainVideoSubtitle: videoSubtitle
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setIsUploading(true);
+      try {
+        const storageRef = ref(storage, `settings/video_cover_${Date.now()}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+        await updateSettings({ mainVideoCoverUrl: url });
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
+  return (
+    <div className="bg-white p-8 shadow-sm border border-gray-200">
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
+        <Play size={20} className="text-primary-gold" /> Vidéo de Présentation (Galerie)
+      </h3>
+      
+      <form onSubmit={handleSave} className="space-y-6">
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Image de Couverture</label>
+          <div className="flex items-center gap-4">
+            <div className="w-32 aspect-video bg-gray-100 border border-gray-200 overflow-hidden">
+               {settings.mainVideoCoverUrl ? (
+                 <img src={settings.mainVideoCoverUrl} className="w-full h-full object-cover" alt="" />
+               ) : (
+                 <div className="w-full h-full flex items-center justify-center text-gray-300">
+                   <ImageIcon size={20} />
+                 </div>
+               )}
+            </div>
+            <div className="flex-grow">
+               <input type="file" id="video-cover" className="hidden" accept="image/*" onChange={handleCoverUpload} />
+               <label htmlFor="video-cover" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors">
+                 {isUploading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
+                 {settings.mainVideoCoverUrl ? "Changer" : "Ajouter"}
+               </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">URL de la Vidéo (YouTube)</label>
+          <input 
+            type="text" 
+            value={videoUrl}
+            onChange={e => setVideoUrl(e.target.value)}
+            className="w-full p-3 border border-gray-200 focus:border-primary-gold outline-none text-sm font-sans"
+            placeholder="ex: https://www.youtube.com/watch?v=..."
+          />
+          <p className="text-[10px] text-gray-400 mt-1 italic">Note: Utilisez une URL YouTube standard.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Titre de la vidéo</label>
+            <input 
+              type="text" 
+              value={videoTitle}
+              onChange={e => setVideoTitle(e.target.value)}
+              className="w-full p-2 border border-gray-200 focus:border-primary-gold outline-none text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Sous-titre de la vidéo</label>
+            <input 
+              type="text" 
+              value={videoSubtitle}
+              onChange={e => setVideoSubtitle(e.target.value)}
+              className="w-full p-2 border border-gray-200 focus:border-primary-gold outline-none text-sm"
+            />
+          </div>
+        </div>
+
+        <Button className="w-full" disabled={isSaving}>
+          {isSaving ? <Loader2 className="animate-spin mx-auto" size={16} /> : "Enregistrer les modifications vidéo"}
+        </Button>
+      </form>
     </div>
   );
 };
@@ -811,6 +955,8 @@ const AddGalleryItemSection: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<Category>('mariage');
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const [videoUrl, setVideoUrl] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -829,14 +975,21 @@ const AddGalleryItemSection: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !selectedFile) return;
+    if (!title) return;
+    if (mediaType === 'image' && !selectedFile) return;
 
     setIsUploading(true);
     try {
-      // 1. Upload to Storage
-      const storageRef = ref(storage, `gallery/${Date.now()}_${selectedFile.name}`);
-      const snapshot = await uploadBytes(storageRef, selectedFile);
-      const downloadURL = await getDownloadURL(snapshot.ref);
+      let downloadURL = '';
+      if (selectedFile) {
+        // 1. Upload to Storage
+        const storageRef = ref(storage, `gallery/${Date.now()}_${selectedFile.name}`);
+        const snapshot = await uploadBytes(storageRef, selectedFile);
+        downloadURL = await getDownloadURL(snapshot.ref);
+      } else if (mediaType === 'video') {
+        // Use a default cover if no file chosen for video
+        downloadURL = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200";
+      }
 
       // 2. Add to Firestore
       await addGalleryItem({
@@ -844,11 +997,14 @@ const AddGalleryItemSection: React.FC = () => {
         title,
         description,
         category,
-        imageUrl: downloadURL
+        imageUrl: downloadURL,
+        mediaType,
+        videoUrl: mediaType === 'video' ? videoUrl : undefined
       });
 
       setTitle('');
       setDescription('');
+      setVideoUrl('');
       setImagePreview(null);
       setSelectedFile(null);
     } catch (error) {
@@ -861,23 +1017,56 @@ const AddGalleryItemSection: React.FC = () => {
   return (
     <div className="bg-white p-8 shadow-sm border border-gray-200">
       <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <ImageIcon size={20} className="text-blue-600" /> Ajouter une Image au Portfolio
+        <ImageIcon size={20} className="text-blue-600" /> Ajouter au Portfolio
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex gap-4 mb-4">
+          <button 
+            type="button" 
+            onClick={() => setMediaType('image')}
+            className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest border ${mediaType === 'image' ? 'bg-primary-dark text-white border-primary-dark' : 'bg-white text-gray-500 border-gray-200'}`}
+          >
+            Image
+          </button>
+          <button 
+            type="button" 
+            onClick={() => setMediaType('video')}
+            className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest border ${mediaType === 'video' ? 'bg-primary-dark text-white border-primary-dark' : 'bg-white text-gray-500 border-gray-200'}`}
+          >
+            Vidéo
+          </button>
+        </div>
+
+        {mediaType === 'video' && (
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">URL YouTube de la Vidéo</label>
+            <input 
+              type="url" 
+              value={videoUrl}
+              onChange={e => setVideoUrl(e.target.value)}
+              className="w-full p-3 border border-gray-200 focus:border-primary-gold outline-none text-sm"
+              placeholder="https://www.youtube.com/watch?v=..."
+              required={mediaType === 'video'}
+            />
+          </div>
+        )}
+
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Fichier image</label>
+          <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
+            {mediaType === 'image' ? "Fichier Image" : "Image de Couverture (Optionnelle)"}
+          </label>
           <div className="relative border-2 border-dashed border-gray-300 p-6 text-center hover:bg-gray-50 transition-colors">
             <input 
               type="file" 
               accept="image/*"
               onChange={handleImageChange}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              required
+              required={mediaType === 'image'}
             />
             <div className="pointer-events-none">
                 <Upload size={24} className="mx-auto text-gray-400 mb-2" />
                 <span className="text-sm text-gray-500">
-                  {selectedFile ? selectedFile.name : "Cliquez pour choisir une image"}
+                  {selectedFile ? selectedFile.name : (mediaType === 'image' ? "Cliquez pour choisir une image" : "Cliquez pour choisir une couverture")}
                 </span>
             </div>
           </div>
@@ -903,7 +1092,7 @@ const AddGalleryItemSection: React.FC = () => {
             value={title}
             onChange={e => setTitle(e.target.value)}
             className="w-full p-3 border border-gray-200 focus:border-primary-gold outline-none"
-            placeholder="ex: Mariage Élégant"
+            placeholder="ex: Vidéo du Gâteau de Mariage"
             required
           />
         </div>
@@ -914,7 +1103,7 @@ const AddGalleryItemSection: React.FC = () => {
             value={description}
             onChange={e => setDescription(e.target.value)}
             className="w-full p-3 border border-gray-200 focus:border-primary-gold outline-none"
-            placeholder="ex: Table ronde avec décoration florale"
+            placeholder="ex: Un moment inoubliable..."
           />
         </div>
         <div>
@@ -939,7 +1128,7 @@ const AddGalleryItemSection: React.FC = () => {
           </select>
         </div>
         <Button className="w-full" disabled={isUploading}>
-          {isUploading ? <Loader2 className="animate-spin mx-auto" size={20} /> : "Ajouter au Portfolio"}
+          {isUploading ? <Loader2 className="animate-spin mx-auto" size={20} /> : (mediaType === 'image' ? "Ajouter au Portfolio" : "Ajouter la Vidéo")}
         </Button>
       </form>
     </div>
@@ -1005,7 +1194,10 @@ const GalleryListSection: React.FC = () => {
               <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
             </div>
             <div className="flex-grow">
-              <h4 className="font-bold text-sm text-primary-dark">{item.title}</h4>
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-sm text-primary-dark">{item.title}</h4>
+                {item.mediaType === 'video' && <Play size={12} className="text-primary-gold" fill="currentColor" />}
+              </div>
               <p className="text-xs text-gray-500 mb-1">{item.description}</p>
               <span className="text-[10px] uppercase tracking-widest bg-gray-100 px-2 py-0.5 text-gray-600 rounded-sm">
                 Catégorie: {item.category}

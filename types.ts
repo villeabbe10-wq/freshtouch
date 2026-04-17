@@ -20,6 +20,8 @@ export interface GalleryItem {
   category: Category;
   imageUrl: string;
   description: string;
+  mediaType?: 'image' | 'video';
+  videoUrl?: string; // YouTube or Vimeo URL
 }
 
 export interface ServiceItem {

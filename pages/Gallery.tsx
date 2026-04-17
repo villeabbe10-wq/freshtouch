@@ -21,26 +21,55 @@ const CATEGORIES: { label: string; value: Category }[] = [
 ];
 
 const VideoSection: React.FC = () => {
+  const { settings } = useData();
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const videoId = useMemo(() => {
+    if (!settings.mainVideoUrl) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = settings.mainVideoUrl.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }, [settings.mainVideoUrl]);
+
+  if (!settings.mainVideoUrl && !settings.mainVideoCoverUrl) return null;
+
   return (
     <section className="py-12 md:py-16 bg-primary-dark relative overflow-hidden text-white">
       <div className="container mx-auto px-6">
-        <SectionTitle subtitle="Vidéo de Présentation" title="Découvrez notre univers en vidéo" dark />
+        <SectionTitle 
+          subtitle={settings.mainVideoSubtitle || "Vidéo de Présentation"} 
+          title={settings.mainVideoTitle || "Découvrez notre univers en vidéo"} 
+          dark 
+        />
         
-        <FadeIn className="max-w-4xl mx-auto mt-8 relative group cursor-pointer aspect-video rounded-sm overflow-hidden shadow-2xl border border-primary-gold/30">
-          <img 
-            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200" 
-            alt="Video Cover" 
-            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-20 h-20 bg-primary-gold/90 rounded-full flex items-center justify-center pl-1 group-hover:scale-110 transition-transform duration-300 shadow-glow">
-              <Play size={32} fill="white" className="text-white" />
+        <FadeIn className="max-w-4xl mx-auto mt-8 relative group aspect-video rounded-sm overflow-hidden shadow-2xl border border-primary-gold/30 bg-black">
+          {isPlaying && videoId ? (
+            <iframe 
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            ></iframe>
+          ) : (
+            <div className="w-full h-full cursor-pointer" onClick={() => setIsPlaying(true)}>
+              <img 
+                src={settings.mainVideoCoverUrl || "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200"} 
+                alt="Video Cover" 
+                className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 bg-primary-gold/90 rounded-full flex items-center justify-center pl-1 group-hover:scale-110 transition-transform duration-300 shadow-glow">
+                  <Play size={32} fill="white" className="text-white" />
+                </div>
+              </div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="font-serif text-2xl font-bold text-white mb-2">{settings.mainVideoTitle || "L'Art de Recevoir"}</h3>
+                <p className="font-sans text-sm text-gray-300">{settings.mainVideoSubtitle || "Cliquez pour lancer la vidéo"}</p>
+              </div>
             </div>
-          </div>
-          <div className="absolute bottom-6 left-6 right-6">
-            <h3 className="font-serif text-2xl font-bold text-white mb-2">L'Art de Recevoir par Fresh Touch Event</h3>
-            <p className="font-sans text-sm text-gray-300">Plongez au cœur de nos plus belles créations</p>
-          </div>
+          )}
         </FadeIn>
       </div>
     </section>
@@ -50,33 +79,53 @@ const VideoSection: React.FC = () => {
 const Lightbox: React.FC<{ item: GalleryItem | null; onClose: () => void }> = ({ item, onClose }) => {
   if (!item) return null;
 
+  const videoId = useMemo(() => {
+    if (item.mediaType !== 'video' || !item.videoUrl) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = item.videoUrl.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }, [item]);
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 outline-none"
       onClick={onClose}
     >
-      <button className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors">
+      <button className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors z-10">
         <X size={32} />
       </button>
       
       <div 
-        className="max-w-5xl max-h-[85vh] relative" 
+        className="max-w-5xl w-full max-h-[85vh] relative" 
         onClick={e => e.stopPropagation()}
       >
-        <motion.img 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          src={item.imageUrl} 
-          alt={item.title} 
-          className="max-w-full max-h-[80vh] object-contain shadow-2xl"
-        />
+        {item.mediaType === 'video' && videoId ? (
+          <div className="aspect-video w-full bg-black shadow-2xl rounded-sm overflow-hidden">
+            <iframe 
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            ></iframe>
+          </div>
+        ) : (
+          <motion.img 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            src={item.imageUrl} 
+            alt={item.title} 
+            className="max-w-full mx-auto max-h-[80vh] object-contain shadow-2xl"
+          />
+        )}
         <div className="mt-4 text-center">
           <h3 className="font-serif text-2xl text-white mb-1">{item.title}</h3>
           <p className="font-sans text-primary-gold uppercase text-xs tracking-widest">{item.category}</p>
-          <p className="font-sans text-gray-300 text-sm mt-2">{item.description}</p>
+          <p className="font-sans text-gray-300 text-sm mt-2 max-w-2xl mx-auto">{item.description}</p>
         </div>
       </div>
     </motion.div>
@@ -167,6 +216,12 @@ const GalleryPage: React.FC = () => {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   
+                  {item.mediaType === 'video' && (
+                    <div className="absolute top-4 right-4 z-10 w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white">
+                      <Play size={14} fill="white" />
+                    </div>
+                  )}
+                  
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-primary-dark/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white p-6 text-center">
                     <span className="text-primary-gold text-[10px] font-sans tracking-[0.2em] uppercase mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100">
@@ -176,7 +231,7 @@ const GalleryPage: React.FC = () => {
                       {item.title}
                     </h3>
                     <div className="mt-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-200">
-                      <ZoomIn size={24} className="text-white/80 hover:text-white transition-colors" />
+                      {item.mediaType === 'video' ? <Play size={24} className="text-primary-gold" fill="currentColor" /> : <ZoomIn size={24} className="text-white/80 hover:text-white transition-colors" />}
                     </div>
                   </div>
                 </motion.div>

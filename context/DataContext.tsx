@@ -91,6 +91,10 @@ interface DataContextType {
     facebookUrl?: string;
     tiktokUrl?: string;
     whatsappNumber?: string;
+    mainVideoUrl?: string;
+    mainVideoCoverUrl?: string;
+    mainVideoTitle?: string;
+    mainVideoSubtitle?: string;
   };
   user: User | null;
   loading: boolean;
@@ -114,6 +118,10 @@ interface DataContextType {
     facebookUrl?: string;
     tiktokUrl?: string;
     whatsappNumber?: string;
+    mainVideoUrl?: string;
+    mainVideoCoverUrl?: string;
+    mainVideoTitle?: string;
+    mainVideoSubtitle?: string;
   }) => Promise<void>;
 }
 
@@ -133,6 +141,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     facebookUrl?: string;
     tiktokUrl?: string;
     whatsappNumber?: string;
+    mainVideoUrl?: string;
+    mainVideoCoverUrl?: string;
+    mainVideoTitle?: string;
+    mainVideoSubtitle?: string;
   }>({});
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -393,6 +405,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     facebookUrl?: string;
     tiktokUrl?: string;
     whatsappNumber?: string;
+    mainVideoUrl?: string;
+    mainVideoCoverUrl?: string;
+    mainVideoTitle?: string;
+    mainVideoSubtitle?: string;
   }) => {
     try {
       await setDoc(doc(db, 'settings', 'site'), newSettings, { merge: true });
@@ -408,6 +424,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       realizations: realizations.length > 0 ? realizations : REALIZATIONS,
       messages,
       testimonials: testimonials.length > 0 ? testimonials : TESTIMONIALS,
+      admins,
       settings,
       user,
       loading,
