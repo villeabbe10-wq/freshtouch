@@ -83,6 +83,7 @@ interface DataContextType {
   realizations: Realization[];
   messages: Message[];
   testimonials: Testimonial[];
+  admins: { uid: string; email: string; role: string }[];
   settings: { 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -104,6 +105,8 @@ interface DataContextType {
   addMessage: (message: Omit<Message, 'id' | 'createdAt' | 'status'>) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
   markMessageAsRead: (id: string) => Promise<void>;
+  addAdminByEmail: (email: string) => Promise<void>;
+  removeAdmin: (uid: string) => Promise<void>;
   updateSettings: (settings: { 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -122,6 +125,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [realizations, setRealizations] = useState<Realization[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [admins, setAdmins] = useState<{ uid: string; email: string; role: string }[]>([]);
   const [settings, setSettings] = useState<{ 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -233,6 +237,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     return () => unsubscribe();
   }, []);
+  
+  // Real-time Admins
+  useEffect(() => {
+    if (!user) {
+      setAdmins([]);
+      return;
+    }
+    const q = query(collection(db, 'users'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as any));
+      setAdmins(items.filter(i => i.role === 'admin'));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'users');
+    });
+    return () => unsubscribe();
+  }, [user]);
+  
+  // Create user doc on login if doesn't exist
+  useEffect(() => {
+    if (user) {
+      const userRef = doc(db, 'users', user.uid);
+      setDoc(userRef, { 
+        email: user.email, 
+        lastLogin: new Date().toISOString() 
+      }, { merge: true }).catch(err => console.error("Update user failed:", err));
+    }
+  }, [user]);
 
   // Actions
   const addGalleryItem = async (item: GalleryItem) => {
@@ -328,6 +359,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const addAdminByEmail = async (email: string) => {
+    // Note: Since we can't easily get UID from email client-side without a cloud function,
+    // we'll store a "pending_admin" list or the user can just log in and then be promoted.
+    // For now, we'll implement a simple system where we search for the user doc or create a placeholder.
+    try {
+      // In this setup, we'll just add a doc to 'users' with a generated ID if we don't have the UID
+      // But better: tell them the user must log in once, then they show up in a list to be promoted.
+      // Or we use the email as the ID for a special collection.
+      // Let's use a simpler approach: add to a 'authorized_emails' collection.
+      await setDoc(doc(db, 'authorized_emails', email.toLowerCase()), { 
+        email: email.toLowerCase(),
+        role: 'admin',
+        addedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `authorized_emails/${email}`);
+    }
+  };
+
+  const removeAdmin = async (uid: string) => {
+    try {
+      await setDoc(doc(db, 'users', uid), { role: 'user' }, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `users/${uid}`);
+    }
+  };
+
   const updateSettings = async (newSettings: { 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -364,6 +422,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addMessage,
       deleteMessage,
       markMessageAsRead,
+      addAdminByEmail,
+      removeAdmin,
       updateSettings
     }}>
       {children}

@@ -26,6 +26,7 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() && 
         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         exists(/databases/$(database)/documents/authorized_emails/$(request.auth.token.email.lower())) ||
          (request.auth.token.email == "seduceconseil@gmail.com" && request.auth.token.email_verified == true));
     }
 
@@ -77,6 +78,10 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       allow write: if isAdmin();
+    }
+
+    match /authorized_emails/{email} {
+      allow read, write: if isAdmin();
     }
   }
 }

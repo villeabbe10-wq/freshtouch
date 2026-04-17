@@ -136,6 +136,7 @@ const AdminPage: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Left Column */}
           <div className="space-y-12">
+            <UserManagementSection />
             <MessageManagementSection />
             <SiteSettingsSection />
             <AddProductSection />
@@ -156,6 +157,73 @@ const AdminPage: React.FC = () => {
 };
 
 // --- Sub Components ---
+
+const UserManagementSection: React.FC = () => {
+  const { admins, addAdminByEmail, removeAdmin, user } = useData();
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setIsSubmitting(true);
+    try {
+      await addAdminByEmail(email);
+      setEmail('');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="bg-white p-8 shadow-sm border border-gray-200">
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
+        <Lock size={20} className="text-primary-gold" /> Gestion des Administrateurs
+      </h3>
+      
+      <form onSubmit={handleAddAdmin} className="flex gap-2 mb-6">
+        <input 
+          type="email" 
+          placeholder="Email du futur admin" 
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          className="flex-grow p-3 border border-gray-200 text-sm outline-none focus:border-primary-gold"
+          required
+        />
+        <button 
+          disabled={isSubmitting}
+          className="bg-primary-dark text-white px-6 py-2 text-xs font-bold uppercase tracking-widest hover:bg-primary-gold transition-colors disabled:opacity-50"
+        >
+          {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : "Ajouter"}
+        </button>
+      </form>
+
+      <div className="space-y-2">
+        <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Administrateurs Actifs</div>
+        {admins.map(admin => (
+          <div key={admin.uid} className="flex justify-between items-center p-3 bg-gray-50 rounded-sm">
+            <span className="text-sm font-medium text-primary-dark">{admin.email}</span>
+            {admin.email !== "seduceconseil@gmail.com" && admin.email !== user?.email && (
+              <button 
+                onClick={() => removeAdmin(admin.uid)}
+                className="text-gray-300 hover:text-red-500 transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
+        ))}
+        {/* Placeholder for permanent admin */}
+        {!admins.find(a => a.email === "seduceconseil@gmail.com") && (
+          <div className="flex justify-between items-center p-3 bg-primary-gold/5 border border-primary-gold/20 rounded-sm">
+            <span className="text-sm font-medium text-primary-dark">seduceconseil@gmail.com</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-gold">Super Admin</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const AddProductSection: React.FC = () => {
   const { addPricingItem } = useData();
