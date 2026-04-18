@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { SectionTitle, Button, FadeIn } from '../components/ui/Common';
 import { useData } from '../context/DataContext';
-import { Lock, Plus, Trash2, Image as ImageIcon, Play, Package, Upload, LogOut, Loader2, Database, Camera, Star, MessageCircle, Instagram, Facebook, LayoutDashboard, CheckCircle, Clock, Phone } from 'lucide-react';
+import { Lock, Plus, Trash2, Image as ImageIcon, Play, Package, Upload, LogOut, Loader2, Database, Camera, Star, MessageCircle, Instagram, Facebook, LayoutDashboard, CheckCircle, Clock, Phone, ShieldCheck, Video, Users, Settings2, ImagePlus, MessageSquare, Trash } from 'lucide-react';
 import { Category, GalleryItem, PricingItem } from '../types';
 import { auth, storage } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -10,7 +10,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { INITIAL_PRICING_DATA, GALLERY_ITEMS } from '../constants';
 
 const AdminPage: React.FC = () => {
-  const { user, loading: authLoading, admins, addPricingItem, addGalleryItem, pricingItems, galleryItems, settings, updateSettings, realizations, addRealization, deleteRealization } = useData();
+  const { user, loading: authLoading, admins, authorizedEmails, addPricingItem, addGalleryItem, pricingItems, galleryItems, settings, updateSettings, realizations, addRealization, deleteRealization } = useData();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
@@ -187,7 +187,7 @@ const AdminPage: React.FC = () => {
 // --- Sub Components ---
 
 const UserManagementSection: React.FC = () => {
-  const { admins, addAdminByEmail, removeAdmin, user } = useData();
+  const { admins, authorizedEmails, addAdminByEmail, removeAdmin, removeAuthorizedEmail, user } = useData();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -204,53 +204,95 @@ const UserManagementSection: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <Lock size={20} className="text-primary-gold" /> Gestion des Administrateurs
+    <div className="bg-white p-8 shadow-sm border border-gray-200 rounded-lg overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary-gold opacity-5 rounded-full -mr-16 -mt-16 pointer-events-none" />
+      
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <Users size={24} className="text-primary-gold" /> Gestion des Administrateurs
       </h3>
       
-      <form onSubmit={handleAddAdmin} className="flex gap-2 mb-6">
+      <form onSubmit={handleAddAdmin} className="flex gap-2 mb-8 relative z-10">
         <input 
           type="email" 
-          placeholder="Email du futur admin" 
+          placeholder="Email du futur administrateur" 
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="flex-grow p-3 border border-gray-200 text-sm outline-none focus:border-primary-gold"
+          className="flex-grow p-4 border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-primary-gold outline-none transition-all rounded-sm text-sm"
           required
         />
         <button 
           disabled={isSubmitting}
-          className="bg-primary-dark text-white px-6 py-2 text-xs font-bold uppercase tracking-widest hover:bg-primary-gold transition-colors disabled:opacity-50"
+          className="bg-primary-dark text-white px-8 py-3 text-xs font-bold uppercase tracking-widest hover:bg-primary-gold transition-all duration-300 disabled:opacity-50 shadow-md hover:shadow-lg rounded-sm"
         >
-          {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : "Ajouter"}
+          {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : "Autoriser"}
         </button>
       </form>
 
-      <div className="space-y-2">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Administrateurs Actifs</div>
-        {admins.length === 0 && user?.email !== "seduceconseil@gmail.com" && (
-          <p className="text-xs text-gray-400 italic">Chargement ou aucun admin supplémentaire...</p>
-        )}
-        {admins.map(admin => (
-          <div key={admin.uid} className="flex justify-between items-center p-3 bg-gray-50 rounded-sm">
-            <span className="text-sm font-medium text-primary-dark">{admin.email}</span>
-            {admin.email !== "seduceconseil@gmail.com" && admin.email !== user?.email && (
-              <button 
-                onClick={() => removeAdmin(admin.uid)}
-                className="text-gray-300 hover:text-red-500 transition-colors"
-              >
-                <Trash2 size={16} />
-              </button>
-            )}
+      <div className="space-y-6 relative z-10">
+        {/* Authorized Emails Section (Pending login) */}
+        {authorizedEmails.length > 0 && (
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary-gold mb-3 flex items-center gap-2">
+              <Clock size={12} /> Emails Autorisés (Attente de connexion)
+            </div>
+            <div className="grid gap-2">
+              {authorizedEmails.map(auth => (
+                <div key={auth.email} className="flex justify-between items-center p-4 bg-amber-50/30 border border-amber-100 rounded-sm group hover:bg-amber-50/50 transition-colors">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-700">{auth.email}</span>
+                    <span className="text-[10px] text-amber-600/70 italic">Ajouté le {new Date(auth.addedAt).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                  <button 
+                    onClick={() => removeAuthorizedEmail(auth.email)}
+                    className="text-gray-300 hover:text-red-500 transition-colors bg-white p-2 rounded-full shadow-sm"
+                    title="Retirer l'autorisation"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-        {/* Permanent admin reminder */}
-        {user?.email === "seduceconseil@gmail.com" && !admins.find(a => a.email === user.email) && (
-          <div className="flex justify-between items-center p-3 bg-primary-gold/5 border border-primary-gold/20 rounded-sm">
-            <span className="text-sm font-medium text-primary-dark">seduceconseil@gmail.com</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-gold">Propriétaire</span>
-          </div>
         )}
+
+        {/* Active Admins Section */}
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3 flex items-center gap-2">
+            <CheckCircle size={12} /> Administrateurs Actifs
+          </div>
+          <div className="grid gap-2">
+            {/* Permanent super-admin */}
+            <div className="flex justify-between items-center p-4 bg-primary-gold/5 border border-primary-gold/10 rounded-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary-gold text-white flex items-center justify-center text-xs font-bold">M</div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-primary-dark">seduceconseil@gmail.com</span>
+                  <span className="text-[10px] text-primary-gold font-bold uppercase tracking-tighter">Propriétaire</span>
+                </div>
+              </div>
+            </div>
+
+            {admins.filter(a => a.email !== "seduceconseil@gmail.com").map(admin => (
+              <div key={admin.uid} className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-sm group hover:bg-white hover:border-primary-gold/20 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold">
+                    {admin.email?.substring(0, 1).toUpperCase() || "A"}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">{admin.email}</span>
+                </div>
+                {admin.email !== user?.email && (
+                  <button 
+                    onClick={() => removeAdmin(admin.uid)}
+                    className="text-gray-300 hover:text-red-500 transition-colors bg-white p-2 rounded-full shadow-sm"
+                    title="Révoquer les accès"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -300,9 +342,9 @@ const VideoManagementSection: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <Play size={20} className="text-primary-gold" /> Vidéo de Présentation (Galerie)
+    <div className="bg-white p-8 shadow-sm border border-gray-200 rounded-lg">
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <Video size={24} className="text-purple-600" /> Vidéo de Présentation (En-tête)
       </h3>
       
       <form onSubmit={handleSave} className="space-y-6">
@@ -396,9 +438,9 @@ const AddProductSection: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <Plus size={20} className="text-green-600" /> Ajouter un Nouveau Produit
+    <div className="bg-white p-8 shadow-sm border border-gray-200 rounded-lg">
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <Package size={24} className="text-green-600" /> Ajouter un Nouveau Produit
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -514,9 +556,9 @@ const SiteSettingsSection: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <ImageIcon size={20} className="text-primary-gold" /> Paramètres du Site
+    <div className="bg-white p-8 shadow-sm border border-gray-200 rounded-lg">
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <Settings2 size={24} className="text-gray-700" /> Paramètres du Site
       </h3>
       
       <div className="space-y-10">
@@ -526,7 +568,7 @@ const SiteSettingsSection: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden">
               {settings.logoUrl ? (
-                <img src={settings.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain p-2" />
+                <img src={settings.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain p-2" referrerPolicy="no-referrer" />
               ) : (
                 <div className="text-[10px] text-gray-300 text-center px-1">Aucun logo</div>
               )}
@@ -555,9 +597,9 @@ const SiteSettingsSection: React.FC = () => {
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Photo de Profil (À Propos)</label>
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+            <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden border border-gray-200 relative group">
               {settings.aboutPhotoUrl ? (
-                <img src={settings.aboutPhotoUrl} alt="About" className="w-full h-full object-cover" />
+                <img src={settings.aboutPhotoUrl} alt="About" className="w-full h-full object-cover transition-transform group-hover:scale-110" referrerPolicy="no-referrer" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-300">
                   <ImageIcon size={24} />
@@ -656,9 +698,9 @@ const MessageManagementSection: React.FC = () => {
   const { messages, deleteMessage, markMessageAsRead } = useData();
 
   return (
-    <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <MessageCircle size={20} className="text-primary-gold" /> Messages Reçus ({messages.length})
+    <div className="bg-white p-8 shadow-sm border border-gray-200 rounded-lg">
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <MessageSquare size={24} className="text-primary-gold" /> Messages Reçus ({messages.length})
       </h3>
       
       <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
@@ -726,14 +768,14 @@ const DashboardSection: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       {stats.map((stat, i) => (
-        <div key={i} className="bg-white p-6 shadow-sm border border-gray-200 rounded-sm">
-          <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-full flex items-center justify-center mb-4`}>
-            <stat.icon size={20} />
+        <div key={i} className="bg-white p-6 shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition-shadow group">
+          <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+            <stat.icon size={24} />
           </div>
           <div className="text-2xl font-bold text-primary-dark">{stat.value}</div>
-          <div className="text-xs font-bold uppercase tracking-widest text-gray-400">{stat.label}</div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">{stat.label}</div>
         </div>
       ))}
     </div>
@@ -886,8 +928,8 @@ const RealizationManagementSection: React.FC = () => {
 
   return (
     <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <Star size={20} className="text-primary-gold" /> Gérer les Réalisations (Gâteaux, Événements...)
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <Star size={24} className="text-amber-500" /> Gérer les Réalisations
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4 mb-8">
         <div className="grid grid-cols-2 gap-4">
@@ -1016,8 +1058,8 @@ const AddGalleryItemSection: React.FC = () => {
 
   return (
     <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <ImageIcon size={20} className="text-blue-600" /> Ajouter au Portfolio
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <ImagePlus size={24} className="text-blue-600" /> Ajouter au Portfolio
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex gap-4 mb-4">
@@ -1073,8 +1115,8 @@ const AddGalleryItemSection: React.FC = () => {
         </div>
         
         {imagePreview && (
-          <div className="relative aspect-video bg-gray-100 overflow-hidden border border-gray-200">
-            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+          <div className="relative aspect-video bg-gray-100 overflow-hidden border border-gray-200 rounded-sm">
+            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             <button 
               type="button" 
               onClick={() => { setImagePreview(null); setSelectedFile(null); }} 
@@ -1148,8 +1190,8 @@ const ProductListSection: React.FC = () => {
 
   return (
     <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <Package size={20} className="text-primary-gold" /> Liste des Produits ({pricingItems.length})
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <Package size={24} className="text-primary-gold" /> Liste des Produits ({pricingItems.length})
       </h3>
       
       <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -1183,15 +1225,15 @@ const GalleryListSection: React.FC = () => {
 
   return (
     <div className="bg-white p-8 shadow-sm border border-gray-200">
-      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-        <ImageIcon size={20} className="text-primary-gold" /> Images du Portfolio ({galleryItems.length})
+      <h3 className="font-serif text-xl font-bold text-primary-dark mb-6 flex items-center gap-3">
+        <ImagePlus size={24} className="text-primary-gold" /> Images du Portfolio ({galleryItems.length})
       </h3>
       
       <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
         {galleryItems.map(item => (
           <div key={item.id} className="flex gap-4 p-3 border border-gray-100 hover:border-primary-gold/30 transition-colors">
             <div className="w-16 h-16 bg-gray-100 flex-shrink-0">
-              <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+              <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             </div>
             <div className="flex-grow">
               <div className="flex items-center gap-2">

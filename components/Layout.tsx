@@ -239,13 +239,13 @@ export const Footer: React.FC = () => {
       
       {/* 2. Main Content Grid */}
       <div className="container mx-auto px-6 py-16 relative z-10">
-        <div className="grid md:grid-cols-12 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
           
           {/* Brand & Socials - Col Span 4 */}
-          <div className="md:col-span-5 lg:col-span-4 space-y-8">
+          <div className="md:col-span-5 lg:col-span-4 space-y-8 flex flex-col items-center md:items-start text-center md:text-left">
             <div>
               {settings.logoUrl ? (
-                <img src={settings.logoUrl} alt="Logo" className="h-16 w-auto object-contain mb-6 brightness-0 invert" />
+                <img src={settings.logoUrl} alt="Logo" className="h-16 w-auto object-contain mb-6 brightness-0 invert mx-auto md:mx-0" />
               ) : (
                 <h2 className="font-serif text-2xl font-bold text-white tracking-widest uppercase mb-4">Fresh Touch Event</h2>
               )}
@@ -268,47 +268,47 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Navigation - Col Span 3 */}
-          <div className="md:col-span-2 lg:col-start-6">
+          <div className="md:col-span-2 lg:col-start-6 flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="font-sans font-bold text-xs uppercase tracking-[0.2em] text-primary-gold mb-8">Explorateur</h3>
             <ul className="space-y-4 font-sans text-sm text-gray-300 opacity-80">
-              <li><NavLink to="/" className="hover:text-white hover:opacity-100 transition-all block py-1 hover:translate-x-1 duration-300">Accueil</NavLink></li>
-              <li><NavLink to="/services" className="hover:text-white hover:opacity-100 transition-all block py-1 hover:translate-x-1 duration-300">Services</NavLink></li>
-              <li><NavLink to="/gallery" className="hover:text-white hover:opacity-100 transition-all block py-1 hover:translate-x-1 duration-300">Portfolio</NavLink></li>
-              <li><NavLink to="/about" className="hover:text-white hover:opacity-100 transition-all block py-1 hover:translate-x-1 duration-300">À Propos</NavLink></li>
-              <li><NavLink to="/contact" className="hover:text-white hover:opacity-100 transition-all block py-1 hover:translate-x-1 duration-300">Contact</NavLink></li>
+              <li><NavLink to="/" className="hover:text-white hover:opacity-100 transition-all block py-1 md:hover:translate-x-1 duration-300">Accueil</NavLink></li>
+              <li><NavLink to="/services" className="hover:text-white hover:opacity-100 transition-all block py-1 md:hover:translate-x-1 duration-300">Services</NavLink></li>
+              <li><NavLink to="/gallery" className="hover:text-white hover:opacity-100 transition-all block py-1 md:hover:translate-x-1 duration-300">Portfolio</NavLink></li>
+              <li><NavLink to="/about" className="hover:text-white hover:opacity-100 transition-all block py-1 md:hover:translate-x-1 duration-300">À Propos</NavLink></li>
+              <li><NavLink to="/contact" className="hover:text-white hover:opacity-100 transition-all block py-1 md:hover:translate-x-1 duration-300">Contact</NavLink></li>
             </ul>
           </div>
 
           {/* Contact - Col Span 5 */}
-          <div className="md:col-span-5 lg:col-span-4 lg:col-start-9">
+          <div className="md:col-span-5 lg:col-span-4 lg:col-start-9 flex flex-col items-center md:items-start">
             <h3 className="font-sans font-bold text-xs uppercase tracking-[0.2em] text-primary-gold mb-8">Nous Trouver</h3>
-            <div className="space-y-6 font-sans text-sm text-gray-300 opacity-80">
-              <div className="flex items-start gap-4 group">
+            <div className="space-y-6 font-sans text-sm text-gray-300 opacity-80 w-full max-w-xs md:max-w-none">
+              <div className="flex items-start gap-4 group justify-center md:justify-start">
                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary-gold flex-shrink-0 group-hover:bg-primary-gold group-hover:text-white transition-colors">
                     <MapPin size={16} />
                  </div>
-                 <div className="pt-2">
+                 <div className="pt-2 text-center md:text-left">
                     <span className="block text-white mb-1 font-medium tracking-wide">Adresse</span>
                     <span>Lomé - Togo</span>
                  </div>
               </div>
 
-              <div className="flex items-start gap-4 group">
+              <div className="flex items-start gap-4 group justify-center md:justify-start">
                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary-gold flex-shrink-0 group-hover:bg-primary-gold group-hover:text-white transition-colors">
                     <Phone size={16} />
                  </div>
-                 <div className="pt-2">
+                 <div className="pt-2 text-center md:text-left">
                     <span className="block text-white mb-1 font-medium tracking-wide">Téléphone</span>
                     <a href="tel:+22891979514" className="block hover:text-white transition-colors">+228 91 97 95 14</a>
                     <a href="tel:+22890201797" className="block mt-1 hover:text-white transition-colors">+228 90 20 17 97</a>
                  </div>
               </div>
 
-              <div className="flex items-start gap-4 group">
+              <div className="flex items-start gap-4 group justify-center md:justify-start">
                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary-gold flex-shrink-0 group-hover:bg-primary-gold group-hover:text-white transition-colors">
                     <Mail size={16} />
                  </div>
-                 <div className="pt-2">
+                 <div className="pt-2 text-center md:text-left">
                     <span className="block text-white mb-1 font-medium tracking-wide">Email</span>
                     <a href="mailto:freshtouchevent@gmail.com" className="hover:text-white transition-colors">freshtouchevent@gmail.com</a>
                  </div>

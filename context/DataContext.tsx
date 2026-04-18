@@ -84,6 +84,7 @@ interface DataContextType {
   messages: Message[];
   testimonials: Testimonial[];
   admins: { uid: string; email: string; role: string }[];
+  authorizedEmails: { email: string; role: string; addedAt: string }[];
   settings: { 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -111,6 +112,7 @@ interface DataContextType {
   markMessageAsRead: (id: string) => Promise<void>;
   addAdminByEmail: (email: string) => Promise<void>;
   removeAdmin: (uid: string) => Promise<void>;
+  removeAuthorizedEmail: (email: string) => Promise<void>;
   updateSettings: (settings: { 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -134,6 +136,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [messages, setMessages] = useState<Message[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [admins, setAdmins] = useState<{ uid: string; email: string; role: string }[]>([]);
+  const [authorizedEmails, setAuthorizedEmails] = useState<{ email: string; role: string; addedAt: string }[]>([]);
   const [settings, setSettings] = useState<{ 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -262,6 +265,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAdmins(items.filter(i => i.role === 'admin'));
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'users');
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  // Real-time Authorized Emails
+  useEffect(() => {
+    if (!user) {
+      setAuthorizedEmails([]);
+      return;
+    }
+    const q = query(collection(db, 'authorized_emails'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({ ...doc.data() } as any));
+      setAuthorizedEmails(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'authorized_emails');
     });
     return () => unsubscribe();
   }, [user]);
@@ -398,6 +417,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const removeAuthorizedEmail = async (email: string) => {
+    try {
+      await deleteDoc(doc(db, 'authorized_emails', email.toLowerCase()));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `authorized_emails/${email}`);
+    }
+  };
+
   const updateSettings = async (newSettings: { 
     aboutPhotoUrl?: string; 
     logoUrl?: string;
@@ -425,6 +452,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messages,
       testimonials: testimonials.length > 0 ? testimonials : TESTIMONIALS,
       admins,
+      authorizedEmails,
       settings,
       user,
       loading,
@@ -441,6 +469,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       markMessageAsRead,
       addAdminByEmail,
       removeAdmin,
+      removeAuthorizedEmail,
       updateSettings
     }}>
       {children}
