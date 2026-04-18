@@ -15,7 +15,10 @@ const AdminPage: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   
-  const isAdminUser = user?.email === "seduceconseil@gmail.com" || admins.some(a => a.uid === user?.uid || a.email === user?.email);
+  const isAdminUser = 
+    user?.email === "seduceconseil@gmail.com" || 
+    admins.some(a => a.uid === user?.uid || a.email === user?.email) ||
+    authorizedEmails.some(a => a.email.toLowerCase() === user?.email?.toLowerCase());
   const handleImportData = async () => {
     setIsImporting(true);
     try {
