@@ -321,6 +321,9 @@ const VideoManagementSection: React.FC = () => {
         mainVideoTitle: videoTitle,
         mainVideoSubtitle: videoSubtitle
       });
+      alert("Vidéo mise à jour avec succès !");
+    } catch (error) {
+      alert("Erreur lors de la mise à jour de la vidéo.");
     } finally {
       setIsSaving(false);
     }
@@ -331,7 +334,7 @@ const VideoManagementSection: React.FC = () => {
       const file = e.target.files[0];
       setIsUploading(true);
       try {
-        const storageRef = ref(storage, `settings/video_cover_${Date.now()}`);
+        const storageRef = ref(storage, `freshtouch/settings/video_cover_${Date.now()}`);
         const snapshot = await uploadBytes(storageRef, file);
         const url = await getDownloadURL(snapshot.ref);
         await updateSettings({ mainVideoCoverUrl: url });
@@ -516,6 +519,9 @@ const SiteSettingsSection: React.FC = () => {
         tiktokUrl: tiktok,
         whatsappNumber: whatsapp
       });
+      alert("Paramètres sociaux enregistrés !");
+    } catch (error) {
+      alert("Erreur lors de l'enregistrement des réseaux sociaux.");
     } finally {
       setIsSavingSocials(false);
     }
@@ -526,7 +532,7 @@ const SiteSettingsSection: React.FC = () => {
       const file = e.target.files[0];
       setIsUploadingAbout(true);
       try {
-        const storageRef = ref(storage, `settings/about_photo_${Date.now()}`);
+        const storageRef = ref(storage, `freshtouch/settings/about_photo_${Date.now()}`);
         const snapshot = await uploadBytes(storageRef, file);
         const url = await getDownloadURL(snapshot.ref);
         await updateSettings({ aboutPhotoUrl: url });
@@ -543,7 +549,7 @@ const SiteSettingsSection: React.FC = () => {
       const file = e.target.files[0];
       setIsUploadingLogo(true);
       try {
-        const storageRef = ref(storage, `settings/logo_${Date.now()}`);
+        const storageRef = ref(storage, `freshtouch/settings/logo_${Date.now()}`);
         const snapshot = await uploadBytes(storageRef, file);
         const url = await getDownloadURL(snapshot.ref);
         await updateSettings({ logoUrl: url });
@@ -899,7 +905,7 @@ const RealizationManagementSection: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const storageRef = ref(storage, `realizations/${Date.now()}_${selectedFile.name}`);
+      const storageRef = ref(storage, `freshtouch/realizations/${Date.now()}_${selectedFile.name}`);
       const snapshot = await uploadBytes(storageRef, selectedFile);
       const url = await getDownloadURL(snapshot.ref);
 
@@ -921,6 +927,7 @@ const RealizationManagementSection: React.FC = () => {
       setSelectedFile(null);
     } catch (error) {
       console.error("Add realization failed:", error);
+      alert("Erreur lors de l'ajout. Vérifiez que le stockage Firebase est activé et que les règles autorisent l'écriture.");
     } finally {
       setIsSubmitting(false);
     }
@@ -1025,7 +1032,7 @@ const AddGalleryItemSection: React.FC = () => {
       let downloadURL = '';
       if (selectedFile) {
         // 1. Upload to Storage
-        const storageRef = ref(storage, `gallery/${Date.now()}_${selectedFile.name}`);
+        const storageRef = ref(storage, `freshtouch/gallery/${Date.now()}_${selectedFile.name}`);
         const snapshot = await uploadBytes(storageRef, selectedFile);
         downloadURL = await getDownloadURL(snapshot.ref);
       } else if (mediaType === 'video') {
@@ -1051,6 +1058,7 @@ const AddGalleryItemSection: React.FC = () => {
       setSelectedFile(null);
     } catch (error) {
       console.error("Upload failed:", error);
+      alert("Erreur lors de l'envoi de l'image. Vérifiez la configuration Firebase Storage.");
     } finally {
       setIsUploading(false);
     }

@@ -448,9 +448,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <DataContext.Provider value={{
       galleryItems,
       pricingItems,
-      realizations: realizations.length > 0 ? realizations : REALIZATIONS,
+      realizations,
       messages,
-      testimonials: testimonials.length > 0 ? testimonials : TESTIMONIALS,
+      testimonials,
       admins,
       authorizedEmails,
       settings,
