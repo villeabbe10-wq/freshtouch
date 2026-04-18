@@ -25,6 +25,19 @@
       },
       "required": ["id", "name", "price", "category"]
     },
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "Customer feedback and testimonials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "content": { "type": "string" },
+        "rating": { "type": "number" }
+      },
+      "required": ["id", "name", "content"]
+    },
     "User": {
       "title": "User",
       "description": "User profile information",
@@ -49,6 +62,10 @@
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile documents"
+    },
+    "/testimonials": {
+      "schema": "Testimonial",
+      "description": "Customer testimonials"
     }
   }
 }

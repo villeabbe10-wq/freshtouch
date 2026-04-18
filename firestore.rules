@@ -46,9 +46,21 @@ service cloud.firestore {
              data.category is string;
     }
 
+    function isValidTestimonial(data) {
+      return data.keys().hasAll(['id', 'name', 'content']) &&
+             data.id is string &&
+             data.name is string && data.name.size() < 200 &&
+             data.content is string && data.content.size() < 5000;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
+
+    match /testimonials/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidTestimonial(request.resource.data);
+    }
 
     match /gallery/{itemId} {
       allow read: if true;
