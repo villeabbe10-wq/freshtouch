@@ -85,24 +85,33 @@ export const Header: React.FC = () => {
                <img 
                  src={settings.logoUrl} 
                  alt="Fresh Touch Event" 
-                 className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                 className="h-14 md:h-16 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                 onError={(e) => {
+                   // Fallback textuel si l'image distante plante
+                   e.currentTarget.style.display = 'none';
+                   const fallback = e.currentTarget.nextElementSibling;
+                   if (fallback) fallback.classList.remove('hidden');
+                   if (fallback) fallback.classList.add('flex');
+                 }}
                />
              ) : (
                <img 
                  src="/logo.png" 
                  alt="Fresh Touch Event" 
-                 className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                 className="h-14 md:h-16 w-auto object-contain transition-transform duration-300 hover:scale-105"
                  onError={(e) => {
-                   // Fallback textuel si l'image n'est pas trouvée
+                   // Fallback textuel si l'image locale n'est pas trouvée
                    e.currentTarget.style.display = 'none';
-                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                   const fallback = e.currentTarget.nextElementSibling;
+                   if (fallback) fallback.classList.remove('hidden');
+                   if (fallback) fallback.classList.add('flex');
                  }}
                />
              )}
              
-             {/* Fallback (Texte) caché par défaut, s'affiche si l'image plante */}
-             <div className={`${settings.logoUrl ? 'hidden' : 'hidden'} flex-col items-start pl-2 border-l border-primary-gold/50 ml-2`}>
-               <span className={`font-serif text-xl md:text-2xl font-bold tracking-tight text-primary-dark leading-none`}>
+             {/* Fallback (Texte) caché par défaut s'il y a un logo chargé */}
+             <div className="hidden flex-col items-start pl-2 border-l border-primary-gold/50 ml-2 group-hover:border-primary-dark transition-colors">
+               <span className="font-serif text-xl md:text-2xl font-bold tracking-tight text-primary-dark leading-none">
                 Fresh Touch
               </span>
               <span className="font-sans text-[9px] tracking-[0.3em] uppercase text-primary-gold pl-0.5 leading-none mt-1">
