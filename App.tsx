@@ -60,17 +60,6 @@ const App: React.FC = () => {
         </Routes>
       </div>
       <Footer />
-
-      {/* Admin Floating Button - Only visible for admins */}
-      {isAdminUser && (
-        <Link 
-          to="/admin" 
-          className="fixed bottom-6 right-6 z-40 w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-primary-gold hover:border-primary-gold hover:shadow-lg transition-all duration-300 opacity-50 hover:opacity-100"
-          title="Administration"
-        >
-          <Settings size={20} />
-        </Link>
-      )}
     </div>
   );
 };

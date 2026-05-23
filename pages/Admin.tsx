@@ -14,11 +14,13 @@ const AdminPage: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
-  
+  const [authError, setAuthError] = useState('');
+
   const isAdminUser = 
     user?.email === "seduceconseil@gmail.com" || 
     admins.some(a => a.uid === user?.uid || a.email === user?.email) ||
     authorizedEmails.some(a => a.email.toLowerCase() === user?.email?.toLowerCase());
+
   const handleImportData = async () => {
     setIsImporting(true);
     try {
@@ -42,13 +44,15 @@ const AdminPage: React.FC = () => {
     }
   };
   
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
     setIsLoggingIn(true);
+    setAuthError('');
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      setAuthError("La connexion Google a échoué. Veuillez réessayer.");
     } finally {
       setIsLoggingIn(false);
     }
@@ -73,17 +77,23 @@ const AdminPage: React.FC = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-primary-cream flex items-center justify-center pt-24 px-6">
-        <div className="bg-white p-8 md:p-12 shadow-xl border border-primary-gold/30 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-primary-dark text-primary-gold rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="bg-white p-8 md:p-12 shadow-xl border border-primary-gold/30 max-w-md w-full text-center rounded-lg">
+          <div className="w-16 h-16 bg-primary-dark text-primary-gold rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
             <Lock size={32} />
           </div>
           <h2 className="font-serif text-2xl text-primary-dark mb-2">Espace Administration</h2>
           <p className="text-sm font-sans text-gray-500 mb-8">Veuillez vous connecter avec votre compte Google autorisé</p>
+
+          {authError && (
+            <div className="mb-6 p-3 bg-red-50 text-red-600 rounded text-xs font-sans font-medium border border-red-100">
+              {authError}
+            </div>
+          )}
           
           <button 
-            onClick={handleLogin} 
+            onClick={handleGoogleLogin} 
             disabled={isLoggingIn}
-            className="w-full bg-white border border-gray-300 p-4 flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors font-sans font-bold text-gray-700 disabled:opacity-50"
+            className="w-full bg-white border border-gray-300 p-4 flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors font-sans font-bold text-gray-700 disabled:opacity-50 rounded shadow-sm"
           >
             {isLoggingIn ? <Loader2 className="animate-spin" size={20} /> : (
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
@@ -98,21 +108,21 @@ const AdminPage: React.FC = () => {
   if (!isAdminUser) {
     return (
       <div className="min-h-screen bg-primary-cream flex items-center justify-center pt-24 px-6">
-        <div className="bg-white p-8 md:p-12 shadow-xl border border-primary-gold/30 max-w-md w-full text-center">
+        <div className="bg-white p-8 md:p-12 shadow-xl border border-primary-gold/30 max-w-md w-full text-center rounded-lg">
           <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <Lock size={32} />
           </div>
           <h2 className="font-serif text-2xl text-primary-dark mb-2">Accès Refusé</h2>
           <p className="text-sm font-sans text-gray-500 mb-4">
-            Désolé, votre compte <strong>{user.email}</strong> n'est pas autorisé à accéder à cette interface.
+            Désolé, votre compte <strong>{user.email}</strong> n'est pas autorisé de manière administrative.
           </p>
           <p className="text-xs text-gray-400 mb-8 italic">
-            Veuillez contacter l'administrateur principal pour demander l'accès.
+            Pour être administrateur, votre e-mail doit être <strong>seduceconseil@gmail.com</strong> ou autorisé.
           </p>
           
           <button 
             onClick={handleLogout} 
-            className="w-full bg-primary-dark text-white p-4 font-sans font-bold hover:bg-primary-gold transition-colors"
+            className="w-full bg-primary-dark text-white p-4 font-sans font-bold hover:bg-primary-gold transition-colors rounded"
           >
             Se déconnecter
           </button>
@@ -120,6 +130,7 @@ const AdminPage: React.FC = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-24">

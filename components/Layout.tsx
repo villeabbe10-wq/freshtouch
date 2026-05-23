@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Link } from 'react-router-dom';
 import { Menu, X, Instagram, Facebook, Mail, Phone, MapPin, ChevronRight } from 'lucide-react';
 import { NAVIGATION_LINKS } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -332,7 +332,10 @@ export const Footer: React.FC = () => {
       <div className="bg-black/20 py-8 border-t border-white/5 relative z-10">
         <div className="container mx-auto px-6 flex justify-center items-center">
           <p className="text-xs text-gray-300 font-sans tracking-widest text-center opacity-70">
-            &copy; {new Date().getFullYear()} FRESH TOUCH EVENT - MARCELINE AYITE. TOUS DROITS RÉSERVÉS.
+            &copy; {new Date().getFullYear()} FRESH TOUCH EVENT - MARCELINE AYITE.{' '}
+            <Link to="/admin" className="hover:text-gray-100 transition-colors select-none cursor-default">
+              TOUS DROITS RÉSERVÉS.
+            </Link>
           </p>
         </div>
       </div>

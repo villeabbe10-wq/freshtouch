@@ -66,6 +66,21 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   // We don't throw here to avoid crashing the whole app, but we log it
 }
 
+// Helper to deeply remove any undefined values from objects before writing to Firestore
+const cleanObject = (obj: any): any => {
+  if (!obj || typeof obj !== 'object') return obj;
+  const cleaned: any = Array.isArray(obj) ? [] : {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const val = obj[key];
+      if (val !== undefined) {
+        cleaned[key] = (typeof val === 'object' && val !== null) ? cleanObject(val) : val;
+      }
+    }
+  }
+  return cleaned;
+};
+
 export interface Message {
   id: string;
   name: string;
@@ -299,7 +314,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Actions
   const addGalleryItem = async (item: GalleryItem) => {
     try {
-      await setDoc(doc(db, 'gallery', item.id), item);
+      await setDoc(doc(db, 'gallery', item.id), cleanObject(item));
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `gallery/${item.id}`);
     }
@@ -315,7 +330,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addPricingItem = async (item: PricingItem) => {
     try {
-      await setDoc(doc(db, 'pricing', item.id), item);
+      await setDoc(doc(db, 'pricing', item.id), cleanObject(item));
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `pricing/${item.id}`);
     }
@@ -331,7 +346,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addRealization = async (item: Realization) => {
     try {
-      await setDoc(doc(db, 'realizations', item.id), item);
+      await setDoc(doc(db, 'realizations', item.id), cleanObject(item));
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `realizations/${item.id}`);
     }
@@ -347,7 +362,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addTestimonial = async (item: Testimonial) => {
     try {
-      await setDoc(doc(db, 'testimonials', item.id), item);
+      await setDoc(doc(db, 'testimonials', item.id), cleanObject(item));
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `testimonials/${item.id}`);
     }
@@ -438,7 +453,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     mainVideoSubtitle?: string;
   }) => {
     try {
-      await setDoc(doc(db, 'settings', 'site'), newSettings, { merge: true });
+      await setDoc(doc(db, 'settings', 'site'), cleanObject(newSettings), { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'settings/site');
     }
