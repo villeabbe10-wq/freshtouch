@@ -74,7 +74,7 @@ const Presentation: React.FC = () => {
       <div className="container mx-auto px-6">
         <FadeIn>
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="font-serif text-3xl md:text-5xl text-primary-dark mb-4 leading-tight">Présentation – Fresh Touch Event</h2>
+            <h2 className="font-serif text-3xl md:text-5xl text-primary-dark mb-4 leading-tight">Fresh Touch Event</h2>
             <p className="font-serif text-xl md:text-2xl italic text-primary-gold mb-12 font-medium">"L'art de recevoir, sublimé."</p>
             
             <div className="font-sans text-gray-600 leading-loose space-y-8 text-lg">

@@ -45,12 +45,12 @@ const AboutPage: React.FC = () => {
                   Je m'appelle <strong>Marceline AYITE</strong>, fondatrice de Fresh Touch Event, une entreprise née d'un amour profond pour l'art de recevoir et la beauté des détails. Depuis toujours, j'ai été fascinée par les ambiances chaleureuses, les tables soigneusement dressées, et les sourires que provoque une décoration bien pensée.
                 </p>
                 <p>
-                  Fresh Touch Event est bien plus qu'un service de location de vaisselle — c'est une invitation à célébrer avec style, à transformer chaque repas en moment mémorable, et à faire de chaque événement une œuvre d'art.
+                  Fresh Touch Event est bien plus qu'un service de location de vaisselle, c'est une invitation à célébrer avec style, à transformer chaque repas en moment mémorable, et à faire de chaque événement une œuvre d'art.
                 </p>
                 
                 <h3 className="font-serif text-2xl text-primary-dark pt-4">Mon histoire</h3>
                 <p>
-                  Tout a commencé à <strong>Lomé</strong>, par une passion pour le beau et le raffinement. J'ai compris que l'élégance pouvait être partagée, et que j'avais le pouvoir d'en faire mon métier. C'est ainsi qu'est né Fresh Touch Event — avec une mission simple: offrir aux autres ce que j'aime créer.
+                  Tout a commencé à <strong>Lomé</strong>, par une passion pour le beau et le raffinement. J'ai compris que l'élégance pouvait être partagée, et que j'avais le pouvoir d'en faire mon métier. C'est ainsi qu'est né Fresh Touch Event avec une mission simple: offrir aux autres ce que j'aime créer.
                 </p>
                 <p>
                   Aujourd'hui, nous accompagnons nos clients dans la création d'ambiances uniques, que ce soit pour un mariage prestigieux, un dîner intime ou un événement d'entreprise. Notre engagement reste le même : l'excellence dans chaque détail.
